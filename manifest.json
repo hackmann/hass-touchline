@@ -6,7 +6,7 @@
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/touchline",
   "requirements": [
-    "pytouchline_extended==1.0.0"
+    "pytouchline_extended==1.0.2"
   ],
   "codeowners": [],
   "iot_class": "local_polling",
