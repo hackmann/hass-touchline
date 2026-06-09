@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import override
 
+import homeassistant.helpers.config_validation as cv
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
@@ -19,6 +20,8 @@ from pytouchline_extended import PyTouchline
 from .const import _LOGGER, DOMAIN
 
 PLATFORMS = [Platform.CLIMATE]
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def _async_import(hass: HomeAssistant, base_config: ConfigType) -> None:
