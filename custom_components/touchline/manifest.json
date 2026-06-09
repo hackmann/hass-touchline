@@ -10,6 +10,7 @@
   ],
   "codeowners": [],
   "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/hackmann/hass-touchline/issues",
   "loggers": [
     "pytouchline"
   ]
