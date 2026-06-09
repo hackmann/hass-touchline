@@ -1,7 +1,7 @@
 {
   "domain": "touchline",
   "name": "Roth Touchline",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "integration_type": "hub",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/touchline",
