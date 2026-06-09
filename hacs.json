@@ -1,7 +1,6 @@
 {
   "name": "Roth Touchline",
   "homeassistant": "2025.2.0",
-  "version": "0.1.2",
   "iot_class": "local_polling",
   "render_readme": true
 }
