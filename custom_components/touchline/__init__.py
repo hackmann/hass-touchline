@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
 from homeassistant.core import DOMAIN as HOMEASSISTANT_DOMAIN, HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import httpx_client
 from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
 from homeassistant.helpers.typing import ConfigType
+from httpx import AsyncClient
 from pytouchline_extended import PyTouchline
+
 from .const import _LOGGER, DOMAIN
 
 PLATFORMS = [Platform.CLIMATE]
@@ -75,7 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         host,
     )
 
-    py_touchline = PyTouchline(url=host)
+    py_touchline = HassTouchline(hass=hass, url=host)
     number_of_devices = await py_touchline.get_number_of_devices_async()
 
     _LOGGER.debug(
@@ -104,3 +109,18 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+
+class HassTouchline(PyTouchline):
+    def __init__(self, hass: HomeAssistant, url: str):
+        super().__init__(url=url)
+        self.hass = hass
+        self._async_client = httpx_client.create_async_httpx_client(
+            hass,
+            verify_ssl=False,
+            timeout=self._timeout,
+        )
+
+    @override
+    def get_async_client(self) -> AsyncClient:
+        return self._async_client

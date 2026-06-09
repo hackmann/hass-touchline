@@ -10,6 +10,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST
 from pytouchline_extended import PyTouchline
+
 from .const import _LOGGER, DOMAIN
 
 DATA_SCHEMA = vol.Schema(
@@ -25,7 +26,7 @@ RESULT_CANNOT_CONNECT = "cannot_connect"
 async def _async_try_connect_and_fetch_basic_info(host):
     """Attempt to connect and, if successful, fetch number of devices."""
     py_touchline = PyTouchline(url=host)
-    result = {"type": None, "data": {}}
+    result = {"type": None, "data": None}
     number_of_devices = None
     device = PyTouchline(id=0, url=host)
     try:
@@ -65,7 +66,6 @@ class TouchlineConfigFlow(ConfigFlow, domain=DOMAIN):
         result = {"type": None, "data": {}}
 
         if user_input is not None:
-
             # Abort if an entry with same host is present.
             self._async_abort_entries_match({CONF_HOST: user_input[CONF_HOST]})
 
@@ -93,12 +93,14 @@ class TouchlineConfigFlow(ConfigFlow, domain=DOMAIN):
                 user_input[CONF_HOST],
             )
             if not errors:
-                return self.async_create_entry(title=user_input[CONF_HOST], data=user_input)
+                return self.async_create_entry(
+                    title=user_input[CONF_HOST], data=user_input
+                )
 
         return self.async_show_form(
             step_id="user",
             data_schema=DATA_SCHEMA,
-            errors = errors,
+            errors=errors,
         )
 
     async def async_step_import(self, user_input: dict[str, Any]) -> ConfigFlowResult:

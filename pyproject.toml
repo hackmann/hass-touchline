@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hass-touchline"
+version = "0.1.3"
+description = "Home Assistant custom component using pytouchline_extended lib."
+readme = "README.md"
+authors = [
+    { name = "Peter Brøndum", email = "peter.brondum@bestseller.com" },
+    { name = "Hack Kampbjørn", email = "com.github@hack.kampbjorn.com" }
+]
+dependencies = [
+    "pytouchline_extended==1.1.2"
+]
+requires-python = ">=3.12"
+
+[project.optional-dependencies]
+test = [
+    "pytest==9.0.0",
+    "pytest-homeassistant-custom-component==0.13.315"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".git", "venv-*"]
+asyncio_mode = "auto"
+pythonpath = ["."]
