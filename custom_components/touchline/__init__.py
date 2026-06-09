@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pytouchline_extended import PyTouchline
-
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
@@ -12,7 +10,7 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
 from homeassistant.helpers.typing import ConfigType
-
+from pytouchline_extended import PyTouchline
 from .const import _LOGGER, DOMAIN
 
 PLATFORMS = [Platform.CLIMATE]
