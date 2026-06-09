@@ -5,13 +5,11 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from pytouchline_extended import PyTouchline
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST
-import homeassistant.helpers.config_validation as cv
-
+from pytouchline_extended import PyTouchline
 from .const import _LOGGER, DOMAIN
 
 DATA_SCHEMA = vol.Schema(
@@ -96,9 +94,9 @@ class TouchlineConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             if not errors:
                 return self.async_create_entry(title=user_input[CONF_HOST], data=user_input)
-        
+
         return self.async_show_form(
-            step_id="user", 
+            step_id="user",
             data_schema=DATA_SCHEMA,
             errors = errors,
         )
@@ -115,7 +113,7 @@ class TouchlineConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if result["type"] != RESULT_SUCCESS:
             return self.async_abort(reason="cannot_connect")
-        
+
         return self.async_create_entry(title=user_input[CONF_HOST], data=user_input)
 
     def _validate_input(self, user_input: dict[str, Any]) -> dict[str, str]:

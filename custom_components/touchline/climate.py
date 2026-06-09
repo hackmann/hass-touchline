@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from typing import Any, NamedTuple
 
-from pytouchline_extended import PyTouchline
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-
 from homeassistant.components.climate import (
     PLATFORM_SCHEMA,
     ClimateEntity,
@@ -16,10 +15,9 @@ from homeassistant.components.climate import (
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, CONF_HOST, UnitOfTemperature
 from homeassistant.core import HomeAssistant
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-
+from pytouchline_extended import PyTouchline
 from .const import _LOGGER, DOMAIN
 
 
