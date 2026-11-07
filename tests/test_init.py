@@ -63,5 +63,5 @@ async def test_setup_entry_exception(
         side_effect=Exception("Connection error")
     )
 
-    with pytest.raises(Exception):
+    with pytest.raises(ConfigEntryNotReady):
         await async_setup_entry(hass, mock_config_entry)

@@ -84,7 +84,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     py_touchline = HassTouchline(hass=hass, url=host)
-    number_of_devices = await py_touchline.get_number_of_devices_async()
+    try:
+        number_of_devices = await py_touchline.get_number_of_devices_async()
+    except Exception as err:
+        raise ConfigEntryNotReady(f"Error connecting to Touchline controller: {err}") from err
 
     _LOGGER.debug(
         "Host: %s, Number of devices found: %s",
