@@ -89,8 +89,8 @@ async def async_setup_entry(
         host,
     )
 
-    # Create a new PyTouchline instance with the host as the IP address.
-    py_touchline = PyTouchline(url=host)
+    # Get the PyTouchline instance from hass.data.
+    py_touchline = hass.data[DOMAIN][config.entry_id]
 
     # Get the number of devices from the PyTouchline instance.
     number_of_devices = await py_touchline.get_number_of_devices_async()
@@ -104,7 +104,7 @@ async def async_setup_entry(
         for device_id in range(number_of_devices)
     ]
     # Add the devices to Home Assistant.
-    async_add_entities(devices, True)
+    async_add_entities(devices, False)
 
 
 # This function sets up the platform.
@@ -151,16 +151,21 @@ class Touchline(ClimateEntity):
 
     async def async_update(self) -> None:
         """Update thermostat attributes."""
-        await self.unit.update_async()
-        self._attr_name = self.unit.get_name()
-        self._device_id = self.unit.get_device_id()
-        self._controller_id = self.unit.get_controller_id()
-        self._attr_unique_id = self._controller_id + self._device_id
-        self._attr_current_temperature = self.unit.get_current_temperature()
-        self._attr_target_temperature = self.unit.get_target_temperature()
-        self._attr_preset_mode = TOUCHLINE_HA_PRESETS.get(
-            (self.unit.get_operation_mode(), self.unit.get_week_program())
-        )
+        try:
+            await self.unit.update_async()
+            self._attr_name = self.unit.get_name()
+            self._device_id = self.unit.get_device_id()
+            self._controller_id = self.unit.get_controller_id()
+            self._attr_unique_id = self._controller_id + self._device_id
+            self._attr_current_temperature = self.unit.get_current_temperature()
+            self._attr_target_temperature = self.unit.get_target_temperature()
+            self._attr_preset_mode = TOUCHLINE_HA_PRESETS.get(
+                (self.unit.get_operation_mode(), self.unit.get_week_program())
+            )
+            self._attr_available = True
+        except Exception as err:
+            _LOGGER.warning("Update failed for %s: %s", self.name, err)
+            self._attr_available = False
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set new target preset mode."""
