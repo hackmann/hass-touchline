@@ -1,7 +1,6 @@
 # https://developers.home-assistant.io/blog/2020/04/16/hassfest/
 name: Validate with HomeAssistant's hassfest
 on:
-  push:
   pull_request:
   schedule:
     - cron: "42 1 28 * *"
@@ -12,3 +11,7 @@ jobs:
     steps:
       - uses: "actions/checkout@v3"
       - uses: home-assistant/actions/hassfest@master
+        if: github.event_name == 'schedule'
+      - uses: home-assistant/actions/hassfest@master
+        if: github.event_name != 'schedule'
+        continue-on-error: true

@@ -1,10 +1,15 @@
 name: workflow.yml
 on:
-  push:
   pull_request:
   workflow_dispatch:
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "actions/checkout@v3"
+      - uses: home-assistant/actions/hassfest@master
+        continue-on-error: true
   build:
     runs-on: ubuntu-latest
     steps:
