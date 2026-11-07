@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hass-touchline"
-version = "0.1.3"
+version = "0.2.0"
 description = "Home Assistant custom component using pytouchline_extended lib."
 readme = "README.md"
 authors = [
