@@ -4,74 +4,18 @@ from __future__ import annotations
 
 from typing import override
 
-import homeassistant.helpers.config_validation as cv
-from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
-from homeassistant.core import DOMAIN as HOMEASSISTANT_DOMAIN, HomeAssistant
-from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import httpx_client
-from homeassistant.helpers.issue_registry import IssueSeverity, async_create_issue
-from homeassistant.helpers.typing import ConfigType
 from httpx import AsyncClient
 from pytouchline_extended import PyTouchline
 
 from .const import _LOGGER, DOMAIN
 
 PLATFORMS = [Platform.CLIMATE]
-
-CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-
-
-async def _async_import(hass: HomeAssistant, base_config: ConfigType) -> None:
-    """Import a config entry from configuration.yaml."""
-
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN,
-        context={"source": config_entries.SOURCE_IMPORT},
-        data=base_config[DOMAIN],
-    )
-    if (
-        result["type"] == FlowResultType.CREATE_ENTRY
-        or result["reason"] == "single_instance_allowed"
-    ):
-        async_create_issue(
-            hass,
-            HOMEASSISTANT_DOMAIN,
-            f"deprecated_yaml_{DOMAIN}",
-            breaks_in_ha_version="2024.10.0",
-            is_fixable=False,
-            issue_domain=DOMAIN,
-            severity=IssueSeverity.WARNING,
-            translation_key="deprecated_yaml",
-            translation_placeholders={
-                "domain": DOMAIN,
-                "integration_title": "Touchline",
-            },
-        )
-        return
-    async_create_issue(
-        hass,
-        DOMAIN,
-        f"deprecated_yaml_import_issue_{result['reason']}",
-        breaks_in_ha_version="2024.10.0",
-        is_fixable=False,
-        issue_domain=DOMAIN,
-        severity=IssueSeverity.WARNING,
-        translation_key=f"deprecated_yaml_import_issue_{result['reason']}",
-        translation_placeholders={
-            "domain": DOMAIN,
-            "integration_title": "Touchline",
-        },
-    )
-
-
-async def async_setup(hass: HomeAssistant, base_config: ConfigType) -> bool:
-    """Set up the Touchline component."""
-    if DOMAIN in base_config:
-        hass.async_create_task(_async_import(hass, base_config))
-    return True
+_HTTPX_CLIENT = "_httpx_client"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -87,7 +31,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         number_of_devices = await py_touchline.get_number_of_devices_async()
     except Exception as err:
-        raise ConfigEntryNotReady(f"Error connecting to Touchline controller: {err}") from err
+        raise ConfigEntryNotReady(
+            f"Error connecting to Touchline controller: {err}"
+        ) from err
 
     _LOGGER.debug(
         "Host: %s, Number of devices found: %s",
@@ -118,15 +64,22 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 class HassTouchline(PyTouchline):
-    def __init__(self, hass: HomeAssistant, url: str):
-        super().__init__(url=url)
-        self.hass = hass
-        self._async_client = httpx_client.create_async_httpx_client(
-            hass,
-            verify_ssl=False,
-            timeout=self._timeout,
-        )
+    """Use a Home Assistant-managed HTTPX client for Touchline requests."""
+
+    def __init__(
+        self, hass: HomeAssistant, id: int = 0, url: str = "", timeout: float = 10.0
+    ) -> None:
+        """Initialize a Touchline client with Home Assistant's HTTPX client."""
+        super().__init__(id=id, url=url, timeout=timeout)
+        domain_data = hass.data.setdefault(DOMAIN, {})
+        if (async_client := domain_data.get(_HTTPX_CLIENT)) is None:
+            async_client = httpx_client.create_async_httpx_client(
+                hass, verify_ssl=False, timeout=self._timeout
+            )
+            domain_data[_HTTPX_CLIENT] = async_client
+        self._async_client: AsyncClient = async_client
 
     @override
     def get_async_client(self) -> AsyncClient:
+        """Return the shared Home Assistant-managed client."""
         return self._async_client
