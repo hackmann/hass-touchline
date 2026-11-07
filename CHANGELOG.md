@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/hackmann/hass-touchline/compare/hass-touchline-v0.2.0...hass-touchline-v0.2.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **2:** touchline: Error on device update ([e2bf8ae](https://github.com/hackmann/hass-touchline/commit/e2bf8aedce9530a186374008336c61107d621801))
+
 ## [0.2.0](https://github.com/hackmann/hass-touchline/compare/hass-touchline-v0.1.3...hass-touchline-v0.2.0) (2026-11-07)
 
 
