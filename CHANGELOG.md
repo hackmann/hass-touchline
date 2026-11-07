@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/hackmann/hass-touchline/compare/hass-touchline-v0.2.1...hass-touchline-v1.0.0) (2026-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* Align Touchline with Home Assistant Core ([#14](https://github.com/hackmann/hass-touchline/issues/14))
+
+### Features
+
+* Align Touchline with Home Assistant Core ([#14](https://github.com/hackmann/hass-touchline/issues/14)) ([08a8eb0](https://github.com/hackmann/hass-touchline/commit/08a8eb087fd393336bc672d2aefdbc4e1cfa4f58))
+
 ## [0.2.1](https://github.com/hackmann/hass-touchline/compare/hass-touchline-v0.2.0...hass-touchline-v0.2.1) (2026-11-07)
 
 
