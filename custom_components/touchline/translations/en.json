@@ -10,10 +10,27 @@
         "step": {
             "user": {
                 "data": {
-                    "ip_address": "IP address"
+                    "host": "Host"
                 },
-                "description": "Provide the URL of the device",
+                "data_description": {
+                    "host": "The hostname or IP address of your Roth Touchline controller."
+                },
                 "title": "Identify the device"
+            }
+        }
+    },
+    "entity": {
+        "climate": {
+            "climate": {
+                "state_attributes": {
+                    "preset_mode": {
+                        "state": {
+                            "program_1": "Program 1",
+                            "program_2": "Program 2",
+                            "program_3": "Program 3"
+                        }
+                    }
+                }
             }
         }
     }

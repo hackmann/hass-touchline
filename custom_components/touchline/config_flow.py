@@ -9,8 +9,9 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST
-from pytouchline_extended import PyTouchline
+from homeassistant.core import HomeAssistant
 
+from . import HassTouchline
 from .const import _LOGGER, DOMAIN
 
 DATA_SCHEMA = vol.Schema(
@@ -23,18 +24,21 @@ RESULT_SUCCESS = "success"
 RESULT_CANNOT_CONNECT = "cannot_connect"
 
 
-async def _async_try_connect_and_fetch_basic_info(host):
+async def _async_try_connect_and_fetch_basic_info(
+    hass: HomeAssistant, host: str
+) -> dict[str, Any]:
     """Attempt to connect and, if successful, fetch number of devices."""
-    py_touchline = PyTouchline(url=host)
-    result = {"type": None, "data": None}
+    py_touchline = HassTouchline(hass=hass, url=host)
+    result: dict[str, str | None] = {"type": None, "data": None}
     number_of_devices = None
-    device = PyTouchline(id=0, url=host)
+    device = HassTouchline(hass=hass, id=0, url=host)
     try:
         number_of_devices = await py_touchline.get_number_of_devices_async()
         if number_of_devices:
             await device.update_async()
-            result["data"] = device.get_controller_id()
-            if result["data"]:
+            controller_id = device.get_controller_id()
+            if controller_id is not None:
+                result["data"] = str(controller_id)
                 result["type"] = RESULT_SUCCESS
             return result
     except Exception as e:
@@ -63,7 +67,7 @@ class TouchlineConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
 
         errors = {}
-        result = {"type": None, "data": {}}
+        result: dict[str, str | None] = {"type": None, "data": None}
 
         if user_input is not None:
             # Abort if an entry with same host is present.
@@ -77,7 +81,7 @@ class TouchlineConfigFlow(ConfigFlow, domain=DOMAIN):
 
             try:
                 result = await _async_try_connect_and_fetch_basic_info(
-                    user_input[CONF_HOST]
+                    self.hass, user_input[CONF_HOST]
                 )
             except Exception as e:  # pylint: disable=broad-except
                 _LOGGER.error("Failed to connect: %s", e)
@@ -85,14 +89,13 @@ class TouchlineConfigFlow(ConfigFlow, domain=DOMAIN):
 
             if result["type"] != RESULT_SUCCESS:
                 errors["base"] = "cannot_connect"
-
-            await self.async_set_unique_id(result["data"])
-            self._abort_if_unique_id_configured()
-            _LOGGER.debug(
-                "Host: %s",
-                user_input[CONF_HOST],
-            )
-            if not errors:
+            else:
+                await self.async_set_unique_id(result["data"])
+                self._abort_if_unique_id_configured()
+                _LOGGER.debug(
+                    "Host: %s",
+                    user_input[CONF_HOST],
+                )
                 return self.async_create_entry(
                     title=user_input[CONF_HOST], data=user_input
                 )
@@ -102,21 +105,6 @@ class TouchlineConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=DATA_SCHEMA,
             errors=errors,
         )
-
-    async def async_step_import(self, user_input: dict[str, Any]) -> ConfigFlowResult:
-        """Import a configuration from yaml configuration."""
-        try:
-            result = await _async_try_connect_and_fetch_basic_info(
-                user_input[CONF_HOST]
-            )
-        except Exception as e:  # pylint: disable=broad-except
-            _LOGGER.error("Failed to connect: %s", e)
-            return self.async_abort(reason="cannot_connect")
-
-        if result["type"] != RESULT_SUCCESS:
-            return self.async_abort(reason="cannot_connect")
-
-        return self.async_create_entry(title=user_input[CONF_HOST], data=user_input)
 
     def _validate_input(self, user_input: dict[str, Any]) -> dict[str, str]:
         """Validate the user input."""
