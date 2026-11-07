@@ -1,0 +1,15 @@
+{
+  "release-type": "python",
+  "packages": {
+    ".": {
+      "package-name": "hass-touchline",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "custom_components/touchline/manifest.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    }
+  }
+}
